@@ -1,6 +1,9 @@
 # Fun Fun Functions - Functional programming in JavaScript
 
 1. [Higher-order Functions](#higher-order-functions)
+2. [Map](#map)
+3. [Reduce basics](#reduce-basics)
+4. [Reduce Advanced](#reduce-advanced)
 
 ## Higher-order Functions
 
@@ -51,8 +54,139 @@ for (var i = 0; i < animals.length; i++) {
 Using the `filter` method with a callback function:
 ```javascript
 var dogs = animals.filter(function(animal) {
+  // Returns true or false value for verification.
   return animal.species === 'dog';
 });
 ```
 
 ## Map
+
+Map is another higher-order function, just like `Array.filter`.
+
+The difference is that Map doesn't just use the values in the array. Map transforms all values in the Array.
+
+Example:
+```javascript
+var animals = [
+  { name: 'Fluffykins', species: 'rabbit' },
+  { name: 'Caro', species: 'dog' },
+  { name: 'Hamilton', species: 'dog' },
+  { name: 'Harold', species: 'fish' },
+  { name: 'Ursula', species: 'cat' },
+  { name: 'Jimmy', species: 'fish' },
+]
+```
+
+Getting an array with all the names:
+
+Example with for loop:
+```javascript
+var names = [];
+for (var i = 0; i < animals.length; i++) {
+  names.push(animals[i].name);
+}
+```
+
+Using `map`:
+```javascript
+var names = animals.map(function(animal) {
+  // returns a transformed object to replace the original object.
+  return animal.name;
+});
+```
+
+## Reduce basics
+
+Previous examples:
+* `Array.map()`: transforms an array of things and returns an array of same size with transformed items.
+* `Array.filter()`: gets a smaller array from the bigger array.
+* `Array.find()`: gets a single element from the bigger array (first match).
+
+You can create your own list transformation using `Array.reduce()`.
+
+Example:
+```javascript
+var orders = [
+  { amount: 250 },
+  { amount: 400 },
+  { amount: 100 },
+  { amount: 325 },
+];
+```
+
+For loop example:
+```javascript
+var totalAmount = 0;
+for (var i = 0; i < orders.length; i++) {
+  totalAmount += orders[i].amount;
+}
+```
+
+Using reduce:
+```javascript
+// The callback has 2 arguments, the accumulator and the current item in the array.
+var totalAmount = orders.reduce(function(sum, order) {
+  return sum + order.amount;
+  // The following 0 is the initial state object.
+  // This will be passed on the first call of the callback.
+}, 0);
+```
+
+## Reduce Advanced
+
+Example: You are getting data from a txt file with data separated with tabs into a JSON format.
+
+data.txt file:
+```
+mark johansson  waffle iron  80  2
+mark johansson  blender 200 1
+mark johansson  knife 10  4
+Nikita Smith  waffle iron 80  1
+Nikita Smith  knife 10  2
+Nikita Smith  port  20  3
+```
+
+Our code would look like this:
+```javascript
+import fs from 'fs';
+
+var output = fs.readFileSync('data.txt', 'utf8')
+  // Removes empty lines and spaces
+  .trim()
+  // Splits into an array of lines
+  .split('\n')
+  // Splits each line into an array separated by tabs
+  .map(line => line.split('\t'))
+  // Iterates over the resulting array of arrays of information from the text file.
+  .reduce((customers, line) => {
+    customers[line[0]] = customers[line[0]] || [];
+    customers[line[0]].push({
+      name: line[1],
+      price: line[2],
+      quantity: line[3]
+    });
+    return customers;
+  }, {})
+```
+
+Now we have the desired output:
+```javascript
+{
+  "mark johansson": [
+    {
+      name: 'waffle iron',
+      price: 80,
+      quantity: 2
+    },
+    {
+      name: 'blender',
+      price: 200,
+      quantity: 1
+    },
+    ...
+  ],
+  "Nikita Smith": [
+    ...
+  ]
+}
+```
