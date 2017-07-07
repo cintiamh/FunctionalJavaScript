@@ -8,6 +8,7 @@
 6. [Currying](#currying)
 7. [Recursion](#recursion)
 8. [Promises](#promises)
+9. [Functors](#functors)
 
 ## Higher-order Functions
 
@@ -344,3 +345,86 @@ console.log(makeTree(categories));
 ```
 
 ## Promises
+
+Functional programming is a way to make your code more composable.
+
+In functional programming we use a lot of callback as a way to given a function, "execute this other function - callback when you're done".
+
+Promises has the same idea, but a lot more powerful, because they are more composable than callbacks.
+
+Callback example:
+```javascript
+import loadImageCallbacked from './load-image-callbacked';
+
+let addImg = (src) => {
+  let imgElement = document.createElement('img');
+  imgElement.src = src;
+  document.body.appendChild(imgElement);
+}
+
+loadImageCallbacked('images/cat1.jpg', (error, img1) => {
+  addImg(img1.src);
+  loadImageCallbacked('images/cat2.jpg', (error, img2) => {
+    addImg(img2.src);
+    loadImageCallbacked('images/cat3.jpg', (error, img3) => {
+      addImg(img3.src);
+    });
+  });
+});
+```
+
+This is not only ugly, but it is NOT running in parallel. Because the next `loadImageCallbacked` will always wait for the previous `addImg` finish before starting.
+
+load-image-callbacked.js
+```javascript
+function loadImage(url, callback) {
+  let image = new Image();
+  image.onload = function() {
+    callback(null, image);
+  }
+  image.onerror = function() {
+    let message = 'Could not load image at ' + url);
+    callback(new Error(message));
+  }
+  image.src = url;
+}
+export default loadImage;
+```
+
+Promise Example:
+```javascript
+import loadImagePromised from './load-image-promised';
+
+Promise.all([
+  loadImagePromised('images/cat1.jpg'),
+  loadImagePromised('images/cat2.jpg'),
+  loadImagePromised('images/cat3.jpg'),
+]).then((images) => {
+  images.forEach(img => addImg(img.src))
+}).catch((error) => {
+  // handle error here
+});
+```
+
+load-image-promised.js
+```javascript
+import 'babelify/polyfill'; // for the Promise
+
+function loadImage(url) {
+  return new Promise((resolve, reject) => {
+    let image = new Image();
+
+    image.onload = function() {
+      resolve(image);
+    }
+    image.onerror = function() {
+      let message = 'Could not load image at ' + url);
+      reject(new Error(message));
+    }
+    image.src = url;
+  });
+}
+export default loadImage;
+```
+
+## Functors
