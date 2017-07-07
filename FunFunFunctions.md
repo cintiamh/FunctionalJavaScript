@@ -428,3 +428,61 @@ export default loadImage;
 ```
 
 ## Functors
+
+`Array.map` and `Array.filter` are functors.
+
+Simple example:
+```javascript
+function plus1(value) {
+  return value + 1;
+}
+
+console.log(plus1(3)) // 4
+console.log(plus1([3, 4])) // BREAKS!!
+```
+
+Simple solution for accepting array and numbers:
+```javascript
+function plus1(value) {
+  if (Array.isArray(value)) {
+    var newArray = [];
+    for(var i = 0; i < value.length; i++) {
+      newArray[i] = value[i] + 1;
+    }
+    return newArray;
+  }
+  return value + 1;
+}
+
+console.log(plus1(3)) // 4
+console.log(plus1([3, 4])) // [4,5]
+```
+
+Now we want to make it work with strings as well => 'ABC' => 'BCD'.
+
+We could just add a specific logic for String as well, but it looks like it might grow rapidly.
+
+```javascript
+function stringFunctor(value, fn) {
+  var chars = value.split('');
+  return chars.map(function(char) {
+    return String.fromCharCode(fn(char.charCodeAt(0)))
+  }).join('');
+}
+
+function plus1(value) {
+  return value + 1;
+}
+
+function minus1(value) {
+  return value - 1;
+}
+
+[3, 4].map(plus1); // [4,5]
+stringFunctor('ABC', plus1); // 'BCD'
+stringFunctor('XYZ', minus1); // 'RXY'
+```
+
+In this example, `map` and `stringFunctor` are both functors.
+
+A functor is a function that when it is given a value and a function, will unwrap the value into its individual parts, feed those parts into the function, that it has been given, and take the return values and return them in a structured form.
