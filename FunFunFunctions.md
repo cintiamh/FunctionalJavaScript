@@ -4,6 +4,8 @@
 2. [Map](#map)
 3. [Reduce basics](#reduce-basics)
 4. [Reduce Advanced](#reduce-advanced)
+5. [Closures](#closures)
+6. [Currying](#currying)
 
 ## Higher-order Functions
 
@@ -190,3 +192,42 @@ Now we have the desired output:
   ]
 }
 ```
+
+## Closures
+
+The function body has access to variables that are defined outside of it.
+
+```javascript
+var me = 'Bruce Wayne';
+function greetMe() {
+  console.log('Hello, ' + me + '!');
+}
+me = 'Batman';
+greetMe();
+// Hello, Batman!
+```
+
+It gets the current value of the variable from when it's run.
+It doesn't copy the variable value from when it was defined.
+
+### Why use Closures?
+
+```javascript
+function sendRequest() {
+  var requestID = '123';
+  $.ajax({
+    url: '/myUrl',
+    success: function(response) {
+      alert('Request ' + requestID + ' returned');
+    }
+  });
+}
+```
+
+The ajax call is asynchronous, so even after a while it will have access to the requestID.
+
+If there was no such thing as Closure, we probably would have to have an Object instance holding all the info about the request.
+
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures
+
+## Currying
