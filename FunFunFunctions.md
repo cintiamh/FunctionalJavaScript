@@ -6,6 +6,7 @@
 4. [Reduce Advanced](#reduce-advanced)
 5. [Closures](#closures)
 6. [Currying](#currying)
+7. [Recursion](#recursion)
 
 ## Higher-order Functions
 
@@ -231,3 +232,66 @@ If there was no such thing as Closure, we probably would have to have an Object 
 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures
 
 ## Currying
+
+Currying is when a function doesn't take all its arguments upfront.
+Instead, it wants you to give it the first argument, and then the function returns another function, which then you are supposed to call with a second argument, which then will return a new function, with a third argument, and so on until all the arguments are provided. And then the last function at the chain is supposed to return the final value you are looking for.
+
+Example (no currying):
+```javascript
+let dragon = (name, size, element) =>
+  name + ' is a ' +
+  size + ' dragon that breathes ' +
+  element + '!'
+```
+
+Now the same example with currying:
+```javascript
+let dragon =
+  name =>
+    size =>
+      element =>
+        name + ' is a ' +
+        size + ' dragon that breathes ' +
+        element + '!'
+
+console.log(dragon('fluffykins')('tiny')('lightning'))
+```
+
+We can also call this in parts:
+```javascript
+let fluffykinsDragon = dragon('fluffykins');
+let tinyDragon = fluffykinsDragon('tiny');
+
+console.log(tinyDragon('lightning'));
+```
+
+Libraries like Lodash has a method like `_.curry(<function>)` that can convert a regular function (like the first example) to work like the curried version of the function.
+
+### Why Currying
+
+Example (no currying):
+```javascript
+let dragons = [
+  { name: 'fluffykins', element: 'lightning' },
+  { name: 'noomi', element: 'lightning' },
+  { name: 'karo', element: 'fire' },
+  { name: 'doomer', element: 'timewarp' }
+]
+
+let hasElement = (element, obj) => obj.element === element
+
+let lightningDragons = dragons.filter(x => hasElement('lightning', x));
+
+console.log(lightningDragons)
+```
+
+Using lodash's curry:
+```javascript
+import '_' from 'lodash';
+
+let hasElement = _.curry((element, obj) => obj.element === element)
+// hasElement returns a new function that expects the obj to be compared to.
+let lightningDragons = dragons.filter(hasElement('lightning'));
+```
+
+## Recursion
