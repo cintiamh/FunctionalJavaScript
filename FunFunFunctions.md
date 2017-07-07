@@ -7,6 +7,7 @@
 5. [Closures](#closures)
 6. [Currying](#currying)
 7. [Recursion](#recursion)
+8. [Promises](#promises)
 
 ## Higher-order Functions
 
@@ -295,3 +296,51 @@ let lightningDragons = dragons.filter(hasElement('lightning'));
 ```
 
 ## Recursion
+
+Recursion is when a function calls itself until it doesn't.
+
+Example:
+```javascript
+let countDownFrom = (num) => {
+  // Stop condition
+  if (num === 0) return;
+  console.log(num);
+  // Calls itself again with next value
+  countDownFrom(num - 1);
+}
+countDownFrom(10);
+```
+
+### Why use recursion?
+
+Every time you do a loop, you can use recursion instead.
+But this doesn't always work the other way around.
+
+Example:
+```javascript
+let categories = [
+  { id: 'animals', parent: null },
+  { id: 'mammals', parent: 'animals' },
+  { id: 'cats', parent: 'mammals' },
+  { id: 'dogs', parent: 'mammals' },
+  { id: 'chihuahua', parent: 'dogs' },
+  { id: 'labrador', parent: 'dogs' },
+  { id: 'persian', parent: 'cats' },
+  { id: 'siamese', parent: 'cats' },
+];
+
+// Make a tree structure from this list:
+let makeTree = (categories, parent = null) => {
+  let node = {};
+
+  categories
+    .filter(c => c.parent === parent)
+    .forEach(c => node[c.id] = makeTree(categories, c.id));
+
+  return node;
+}
+
+console.log(makeTree(categories));
+```
+
+## Promises
