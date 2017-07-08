@@ -566,3 +566,27 @@ Streams composes well together.
 Data and functions are separated and don't influence (mess with) each other.
 
 ## Monad
+
+Monad is a type of functor.
+
+Monad is a functor (implements map) that also implements flatmap.
+
+Example:
+```javascript
+const Bacon = require('baconjs')
+const stream = new Bacon.Bus()
+
+stream
+  .map(word => word.toUpperCase())
+  .onValue(word => console.log(word))
+
+stream.push('cat');
+stream.push('meal');
+stream.push('trumpet');
+```
+
+Flatmap works just like map, but will also flat the streams to return the values within the streams.
+
+use as `.flatMap` instead of `.map`
+
+Promises `.flatMap` is called `.then`
