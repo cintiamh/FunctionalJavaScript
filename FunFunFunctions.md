@@ -9,6 +9,8 @@
 7. [Recursion](#recursion)
 8. [Promises](#promises)
 9. [Functors](#functors)
+10. [Streams](#streams)
+11. [Monad](#monad)
 
 ## Higher-order Functions
 
@@ -486,3 +488,81 @@ stringFunctor('XYZ', minus1); // 'RXY'
 In this example, `map` and `stringFunctor` are both functors.
 
 A functor is a function that when it is given a value and a function, will unwrap the value into its individual parts, feed those parts into the function, that it has been given, and take the return values and return them in a structured form.
+
+## Correction
+
+Functors are objects that implement methods like a `map` method.
+
+In the JavaScript world, the best example of a functor is the `Array` object. Others are `Promises`, `Streams`, `Crease`.
+
+Example:
+```javascript
+const dragons = [
+  { name: 'Fluffykins', health: 70 },
+  { name: 'Deathlord', health: 65000 },
+  { name: 'Little pizza', health: 2 }
+]
+
+const names = dragons.map(dragon => dragon.name)
+
+console.log(names);
+```
+
+Important things that `Array.map` does to qualify `Array` as a functor:
+* Transformation of contents. The callback passed in to `Array.map` can transform the array content.
+* Maintain Structure. Array.map doesn't change the length of the original Array.
+* Return a new Functor. Array.map returns a new Array with the same length and manipulated values.
+
+## Streams
+
+Streams is like Array in a sense that it is a lot of values and it is like Promise in a sense that those values will be eventually available.
+
+Example:
+```javascript
+const stupidNumberStream = {
+  each: (callback) => {
+    setTimeout(() => callback(1), 1000)
+    setTimeout(() => callback(2), 2000)
+    setTimeout(() => callback(3), 3000)
+  }
+}
+createStupidNumberStream.each(console.log)
+```
+
+There are several implementations of a Stream, but in the core is just a way of modeling a flow of values that are coming in a not predictable way.
+
+Streams were created in order to be able to read a big chunk of data into memory and process it without overflowing your memory.
+
+You model the big file reading as a Stream, and then you attach a handler at the end of the stream and you process each row individually until you're done.
+
+Example:
+```javascript
+const fs = require('fs');
+const highland = require('highland');
+
+highland(fs.createReadStream('customers.csv', 'utf8'))
+  // Breaks into lines
+  .split()
+  // Splits the comma separated values into an array
+  .map(line => line.split(','))
+  // converts the array into a meaninful JSON object
+  .map(parts => ({
+    name: parts[0],
+    numPurchases: parts[1]
+  }))
+  // Filter only the most active clients
+  .filter(customer => customer.numPurchases > 2)
+  // Show only the names
+  .map(customer => customer.name)
+  .each(x => console.log('each: ', x))
+```
+
+In Front End development, you can create Stream of Events with handlers in the end of those Streams.
+
+This helps to make the application Stateless to prevent bugs.
+
+Streams composes well together.
+
+Data and functions are separated and don't influence (mess with) each other.
+
+## Monad
