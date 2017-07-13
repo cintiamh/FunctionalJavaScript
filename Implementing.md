@@ -81,4 +81,25 @@ _.flatMap(['understanding', 'monads'], s => [...s])
 
 Check Monet.js
 
-## Escaping the Pyramid of Doom
+## Asynchronous Code and Promises in Depth
+
+### Escaping the Pyramid of Doom
+
+Also known as "Callback hell".
+
+Callbacks inside callbacks.
+
+```javascript
+higherOrderFunction1( ( ...callbackArgs1 ) => {
+  higherOrderFunction2(( ...callbackArgs2) => {
+    higherOrderFunction3(( ...callbackArgs3) => {
+      // ...
+    })
+  })
+})
+```
+
+Symptom: "Callback hell"
+Root cause: Handling asynchronous code.
+
+### ES6 Promises and Functional Programming
