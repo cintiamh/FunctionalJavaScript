@@ -103,3 +103,70 @@ Symptom: "Callback hell"
 Root cause: Handling asynchronous code.
 
 ### ES6 Promises and Functional Programming
+
+#### Promises
+
+Describe the eventual result of an asynchronous operation.
+
+As a kid I used to ask my parents for ice cream when there was no ice cream shop around.
+My parents would usually promise me, that as soon as we saw a shop, I would get an ice cream.
+Until we found an ice cream shop, I would be left with that promise; as soon as I got the ice cream the promise would be 'resolved' and I would say "thank you".
+If we didn't end up finding an ice cream shop I would usually fail gracefully by demanding cake.
+
+```javascript
+const giveMeIceCream = new Promise((resolve, reject) => {
+  // ...
+  if (iceCreamIsFound) {
+    resolve(iceCream);
+  }
+  // ...
+  reject(noShopWasFound);
+});
+
+giveMeIceCream.then(onFulfilled, onRejected);
+giveMeIceCream.catch(onRejected);
+```
+
+#### Handling multiple promises
+
+* `Promise.all`
+
+```javascript
+Promise.all([firstPromise, secondPromise])
+  .then(onAllPromisesAreFulfilled)
+  .catch(onAnyPromiseIsRejected);
+```
+
+Example:
+
+Callbacks inside callbacks
+```javascript
+higherOrderFunction1((...callbackArgs1) => {
+  higherOrderFunction2((...callbackArgs2) => {
+    higherOrderFunction3((...callbackArgs3) => {
+      // ...
+    })
+  })
+})
+```
+
+To Promises
+```javascript
+const asyncPromise1 = new Promise((resolve, reject) => {
+  resolve(callbackArg1);
+}).then(callbackArg1 => {
+  const asyncPromise2 = new Promise((resolve, reject) => {
+    resolve(callbackArg2);
+  });
+  return asyncPromise2;
+}).then(callbackArg2 => {
+  const asyncPromise3 = new Promise((resolve, reject) => {
+    resolve(callbackArg3);
+  });
+  return asyncPromise3;
+}).then(callbackArg3 => {
+
+});
+```
+
+### Asynchronous Functional Programming with ES6 Generator Functions
