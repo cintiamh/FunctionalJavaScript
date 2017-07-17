@@ -6,6 +6,8 @@
 4. [ES6 Promises and Functional Programming](#es6-promises-and-functional-programming)
 5. [Asynchronous Functional Programming with ES6 Generator Functions](#asynchronous-functional-programming-with-es6-generator-functions)
 6. [Functional Programming with Async-Await](#functional-programming-with-async-await)
+7. [Lazy Evaluation](#lazy-evaluation)
+8. [Using ES6 Generator Functions for Evaluating Lazy Sequences](#using-es6-generator-functions-for-evaluating-lazy-sequences)
 
 ## Functors in Javascript
 
@@ -352,3 +354,117 @@ const populateBooks = async user => {
 
 populateBooks('Zsolt').then(() => console.log('done'));
 ```
+
+Re-implementing a chain of Promises.
+
+```javascript
+const asyncSequence = async function() {
+  const asyncPromise1 = new Promise((resolve, reject) => {
+    setTimeout(() => { resolve('1'); }, 1000);
+  });
+  const callbackArg1 = await asyncPromise1;
+  console.log('callbackArg1', callbackArg1);
+  const asyncPromise2 = new Promise((resolve, reject) => {
+    setTimeout(() => { resolve('2'); }, 1000);
+  });
+  const callbackArg2 = await asyncPromise2;
+  console.log('callbackArg2', callbackArg2);
+  const asyncPromise3 = new Promise((resolve, reject) => {
+    setTimeout(() => { resolve('3'); }, 1000);
+  });
+  const callbackArg3 = await asyncPromise3;
+  console.log('callbackArg3', callbackArg3);
+};
+
+asyncSequence()
+  .then(() => console.log('done'));
+```
+
+## Lazy Evaluation
+
+### What is Lazy Evaluation?
+
+* Eager or Greedy Evaluation - Immediate
+* Lazy Evaluation - Delayed, on demand
+
+Examples:
+
+Eager Evaluation:
+```javascript
+[1, 2, 3, 4, 5].map(x => 2 * x)[0]
+[2, 4, 6, 8, 10][0]
+2
+```
+
+Lazy Evaluation:
+```javascript
+lazyMap([1, 2, 3, 4, 5], x => 2 * x).get(0)
+(x => 2 * x)([1, 2, 3, 4, 5][0])
+(x => 2 * x)(1)
+2
+```
+
+```javascript
+const lazyMap = (arr, mapFunction) => {
+  return {
+    get: function(index) {
+      return mapFunction(arr[index]);
+    },
+    take: function(n) {
+      return arr.slice(0, n).map(mapFunction);
+    },
+    value: function() {
+      return arr.map(mapFunction)
+    }
+  }
+}
+```
+
+With this approach, you might need to re-calculate the values multiple times.
+
+You can use Memoization in order to avoid this.
+
+```javascript
+const memo = f => {
+  // create a lookup table
+  let memoMap = new Map();
+  return fArg =>
+  memoMap.has(fArg) ?
+  memoMap.get(fArg) :
+  memoMap.set(fArg, f(fArg)).get(fArg);
+}
+```
+
+Memoization with lazy evaluation:
+```javascript
+const lazyMemoMap = (arr, mapFunction) => {
+  const memo = [];
+  return {
+    get: function(index) {
+      if (memo[index]) return memo[index];
+      const result = mapFunction(arr[index]);
+      memo[index] = result;
+      return result;
+    }
+  }
+}
+```
+
+Advantages and disadvantages:
+
+* Eager Evaluation
+  * Faster when all elements are needed
+  * May be a lot slower when just some elements are needed
+  * Calculates all values once
+  * Tends to perform calculations that are thrown away
+  * Requires more space in edge cases
+  * Only works with finite sequences
+* Lazy Evaluation
+  * Slower when all elements are needed
+  * A lot faster when just some elements are needed
+  * May use memoization to avoid calculating the same values multiple times.
+  * Only calculates what's needed
+  * Requires less space in edge cases
+  * Works with finite and infinite sequences
+
+### Using ES6 Generator Functions for Evaluating Lazy Sequences
