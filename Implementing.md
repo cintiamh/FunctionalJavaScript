@@ -3,6 +3,9 @@
 1. [Functors in Javascript](#functors-in-javascript)
 2. [Monads](#monads)
 3. [Escaping the Pyramid of Doom](#escaping-the-pyramid-of-doom)
+4. [ES6 Promises and Functional Programming](#es6-promises-and-functional-programming)
+5. [Asynchronous Functional Programming with ES6 Generator Functions](#asynchronous-functional-programming-with-es6-generator-functions)
+6. [Functional Programming with Async-Await](#functional-programming-with-async-await)
 
 ## Functors in Javascript
 
@@ -170,3 +173,182 @@ const asyncPromise1 = new Promise((resolve, reject) => {
 ```
 
 ### Asynchronous Functional Programming with ES6 Generator Functions
+
+Iterables and Iterators
+* Data source: array and string
+* Data consumer: spread operator
+* Iterate Object
+
+#### Generator functions
+
+`const generatorFunction = function *() { ... }`
+
+It returns an iterator which is also an iterable object.
+
+```javascript
+const iterator = generatorFunction();
+iterator.next(); // acting as an iterator
+[...iterator]; // acting as an iterable object
+```
+
+`yield` returns the next value of the iteration and pauses execution of the generator function.
+
+`return` terminates the generator function.
+
+```javascript
+const oneTwoGenerator = function *() {
+  yield 1; yield 2; return;
+}
+```
+
+Example:
+```javascript
+const daysGenerator = function *() {
+  yield 'Sunday';
+  yield 'Monday';
+  yield 'Tuesday';
+  yield 'Wednesday';
+  yield 'Thursday';
+  yield 'Friday';
+  yield 'Saturday';
+  return 'We are done';
+}
+
+const daysIterator = daysGenerator();
+
+console.log(daysIterator.next());
+console.log(daysIterator.next());
+console.log(daysIterator.next());
+console.log(daysIterator.next());
+console.log(daysIterator.next());
+console.log(daysIterator.next());
+console.log(daysIterator.next());
+console.log(daysIterator.next());
+```
+
+Outputs:
+```javascript
+Object {value: "Sunday", done: false}
+Object {value: "Monday", done: false}
+Object {value: "Tuesday", done: false}
+Object {value: "Wednesday", done: false}
+Object {value: "Thursday", done: false}
+Object {value: "Friday", done: false}
+Object {value: "Saturday", done: false}
+Object {value: "We are done", done: true}
+```
+
+Note that the last line has `done` as `true`.
+
+Re-implementing from Promises using Generators:
+
+Promises:
+```javascript
+const asyncPromise1 = new Promise((resolve, reject) => {
+  resolve(callbackArg1);
+}).then(callbackArg1 => {
+  const asyncPromise2 = new Promise((resolve, reject) => {
+    resolve(callbackArg2);
+  });
+  return asyncPromise2;
+}).then(callbackArg2 => {
+  const asyncPromise3 = new Promise((resolve, reject) => {
+    resolve(callbackArg3);
+  });
+  return asyncPromise3;
+}).then(callbackArg3 => {
+
+});
+```
+
+Generators:
+```javascript
+const asyncSequence = function *() {
+  const asyncPromise1 = new Promise((resolve, reject) => {
+    resolve(callbackArg1);
+  });
+  const callbackArg1 = yield asyncPromise1;
+  const asyncPromise2 = new Promise((resolve, reject) => {
+    resolve(callbackArg2);
+  });
+  const callbackArg2 = yield asyncPromise2;
+  const asyncPromise3 = new Promise((resolve, reject) => {
+    resolve(callbackArg3);
+  });
+  const callbackArg3 = yield asyncPromise3;
+}
+
+const asyncIterator = asyncSequence();
+
+asyncIterator.next().value
+  .then(callbackArg1 => asyncIterator.next(callbackArg1).value)
+  .then(callbackArg2 => asyncIterator.next(callbackArg2).value)
+  .then(callbackArg3 => asyncIterator.next(callbackArg3).value)
+```
+
+### Functional Programming with Async-Await
+
+#### Async Operator
+
+`async` keyword denotes asynchronous functions
+
+```javascript
+const f = async function(...args){ ... }
+const f = async (...args) => { ... }
+async function f(...args) { ... }
+```
+
+Asynchronous functions return a promise.
+
+Returned values are wrapped in a resolved promise
+
+```javascript
+const fiveResolved = async function() {
+  return 5;
+};
+fiveResolved().then(v => console.log(v));
+```
+
+Errors are wrapped in a rejected promise.
+
+```javascript
+const fiveRejected = async function() {
+  throw new Error('Cannot compute five');
+};
+fiveRejected().catch(e => console.log(e.message));
+```
+
+#### Await Operator
+
+* Can only be used inside async functions
+* `await promise;`
+* Blocks execution of the function until its operand is resolved or rejected
+* Resolved promise
+  * `const value = await Promise.resolve(5);`
+* Rejected promise
+  * `await fiveRejected; // throws an error`
+
+Example
+
+```javascript
+const isLoggedIn = async () => true;
+const getTopTenGoogleBooks = async x => x;
+const renderBooks = x => {
+  console.log(`${x} has been rendered.`);
+};
+
+const populateBooks = async user => {
+  const isLogged = await isLoggedIn(user);
+  if (isLogged) {
+    // Parallel async calls
+    const [books1, books2] = await Promise.all([
+      getTopTenGoogleBooks('JavaScript'),
+      getTopTenGoogleBooks('PHP')
+    ]);
+    renderBooks(books1);
+    renderBooks(books2);
+  }
+}
+
+populateBooks('Zsolt').then(() => console.log('done'));
+```
