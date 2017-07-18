@@ -468,3 +468,28 @@ Advantages and disadvantages:
   * Works with finite and infinite sequences
 
 ### Using ES6 Generator Functions for Evaluating Lazy Sequences
+
+#### Lazy Filter
+
+```javascript
+const lazyFilter = function *(iterable, filterFunction) {
+  for (let elem of iterable) {
+    if (filterFunction(elem)) yield elem;
+  }
+}
+
+const lazySequence = lazyFilter([1, 2, 3, 4, 5], x => x % 2 === 0)
+
+lazySequence.next().value;
+// 2
+lazySequence.next().value;
+// 4
+lazySequence.next();
+// Object {value: undefined, done: true}
+```
+
+Restrictions of Lazily Evaluated Sequences with Generator Functions:
+
+* Elements can only be accessed sequentially
+* Elements can only be retrieved once
+* Infinite sequences are not exhaustively enumerable
